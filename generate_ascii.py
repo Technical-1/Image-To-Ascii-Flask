@@ -22,6 +22,9 @@ def image_to_ascii(image_input, width=50, height=30, chars="@%#*+=-:. "):
     Returns:
         List of strings, each representing a line of ASCII art
     """
+    if not chars:
+        raise ValueError("chars must contain at least one character")
+
     try:
         # Open image if it's a path or file-like object
         if isinstance(image_input, str):
