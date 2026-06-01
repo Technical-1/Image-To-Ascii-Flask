@@ -1,0 +1,25 @@
+name: Deploy to Render
+
+# Triggers a Render deploy on every push to main via the service's Deploy Hook.
+# The hook URL (which contains its own auth key) is stored in the
+# RENDER_DEPLOY_HOOK repository secret.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Render deploy
+        env:
+          RENDER_DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK }}
+        run: |
+          if [ -z "$RENDER_DEPLOY_HOOK" ]; then
+            echo "RENDER_DEPLOY_HOOK secret is not set." >&2
+            exit 1
+          fi
+          curl -fsS -X POST "$RENDER_DEPLOY_HOOK"
+          echo "Render deploy triggered."
