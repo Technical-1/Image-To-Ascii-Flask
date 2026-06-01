@@ -80,9 +80,9 @@ Image-To-Ascii-Flask/
 ├── app.py                 # Flask web application (POST /convert endpoint)
 ├── generate_ascii.py      # Core ASCII conversion logic (+ standalone CLI)
 ├── requirements.txt       # Python dependencies
-├── Dockerfile             # Production image (installs libcairo2 for SVG)
-├── render.yaml            # Render deployment config (Docker web service)
+├── render.yaml            # Render deployment config (Python web service)
 ├── Procfile               # gunicorn process definition
+├── runtime.txt            # Pins Python 3.12
 ├── templates/
 │   └── index.html         # Web UI template
 └── static/
@@ -94,11 +94,11 @@ Uploads are processed in memory — no files are written to disk.
 
 ## Deployment
 
-The app is deployed on [Render](https://render.com) as a Docker web service. The
-`Dockerfile` is built on `python:3.12-slim` and installs `libcairo2`, which
-cairosvg needs to rasterize SVG uploads (the default Python buildpack lacks it,
-which is why SVG conversion requires the container). gunicorn serves the app with
-2 workers, bound to the `$PORT` Render injects at runtime.
+The app is deployed on [Render](https://render.com) as a Python web service that
+auto-deploys the `main` branch on every push. Render installs dependencies with
+`pip install -r requirements.txt` (Python 3.12 is pinned in `runtime.txt`) and
+serves the app with gunicorn — 2 workers bound to the `$PORT` Render injects at
+runtime, as defined in `render.yaml`.
 
 ```bash
 # Run the production server locally
