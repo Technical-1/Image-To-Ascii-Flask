@@ -1,12 +1,8 @@
 services:
   - type: web
     name: image-to-ascii
-    env: python
-    buildCommand: pip install --upgrade pip && pip install -r requirements.txt
-    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT --workers 2
+    runtime: docker
+    dockerfilePath: ./Dockerfile
     envVars:
-      - key: PYTHON_VERSION
-        value: 3.12.10
       - key: FLASK_ENV
         value: production
-
