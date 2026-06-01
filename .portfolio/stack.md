@@ -28,7 +28,7 @@
 
 - **Hosting**: Render (Python web service)
 - **Build**: `pip install -r requirements.txt`; Python 3.12 pinned via `runtime.txt`
-- **CI/CD**: Render auto-deploys the `main` branch on every push
+- **CI/CD**: GitHub Actions (`deploy.yml`) triggers a Render Deploy Hook on every push to `main`
 - **Monitoring**: None (server-side exception logging via Flask's logger)
 
 ## Development Tools

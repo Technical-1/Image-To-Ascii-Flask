@@ -19,7 +19,7 @@ People want to turn an image into ASCII art without installing anything. A hoste
 Changing the width/height sliders or character set re-runs the conversion automatically, debounced in `script.js` so rapid slider drags don't flood the server with requests.
 
 ### Multiple character sets plus custom ramps
-Presets (standard, extended, simple, blocks, detailed) cover different detail/contrast trade-offs, and a custom field lets users supply any ramp.
+Presets (standard, extended, simple, blocks, detailed) cover different detail/contrast trade-offs. They're checkboxes rather than a single choice, so selecting several concatenates their characters into one richer ramp, and a custom field overrides everything when filled in.
 
 ### Broad format support including SVG
 PNG, JPG, GIF, BMP, and WEBP are decoded directly by Pillow; SVG uploads are rasterized to PNG by cairosvg first, so vector art works too.
@@ -74,6 +74,12 @@ SVGs can't be decoded by Pillow directly, so cairosvg rasterizes them to PNG byt
 
 ### Is there a file size or dimension limit?
 Yes — uploads are capped at 16 MB, and the output width/height are clamped to 1–300 characters to keep each conversion cheap and prevent memory exhaustion.
+
+### Can I combine character sets?
+Yes — the presets are checkboxes, so checking several joins their characters into a single ramp (`getSelectedChars` concatenates the selected values). Typing into the custom-characters field overrides the checkboxes entirely.
+
+### How are new commits deployed?
+A GitHub Actions workflow runs on every push to `main` and POSTs to a Render Deploy Hook, which kicks off a fresh build and rollout. The hook URL is stored as the `RENDER_DEPLOY_HOOK` repository secret, so no Render API key lives in the repo, and `workflow_dispatch` allows a manual redeploy from the Actions tab.
 
 ### Why run on port 5001 locally?
 macOS often uses port 5000 for AirPlay, so the dev server defaults to 5001; you can pass a different port as a CLI argument.

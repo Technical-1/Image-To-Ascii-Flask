@@ -13,6 +13,9 @@ flowchart TD
     Pillow --> JSON["JSON response: ascii + lines[]"]
     JSON --> Browser
     Gunicorn["gunicorn (2 workers) on Render"] -.serves.-> Flask
+    Push["push to main"] --> GHA["GitHub Actions (deploy.yml)"]
+    GHA -.->|"POST Render Deploy Hook"| Render["Render deploy"]
+    Render -.starts.-> Gunicorn
 ```
 
 ## Component Descriptions
@@ -33,9 +36,9 @@ flowchart TD
 - **Key responsibilities**: Width/height sliders synced to number inputs (clamped 10–200), character-set presets plus a custom field, debounced re-conversion, and copy/download of the result.
 
 ### Runtime / deployment
-- **Purpose**: Run the app in production.
-- **Location**: `render.yaml`, `Procfile`, `runtime.txt`
-- **Key responsibilities**: Run on Render as a Python web service (Python 3.12 pinned in `runtime.txt`), installing dependencies with `pip install -r requirements.txt` and serving via gunicorn with 2 workers bound to Render's injected `$PORT`.
+- **Purpose**: Run the app in production and ship new commits to it.
+- **Location**: `render.yaml`, `Procfile`, `runtime.txt`, `.github/workflows/deploy.yml`
+- **Key responsibilities**: Run on Render as a Python web service (Python 3.12 pinned in `runtime.txt`), installing dependencies with `pip install -r requirements.txt` and serving via gunicorn with 2 workers bound to Render's injected `$PORT`. A GitHub Actions workflow triggers a Render deploy via the service's Deploy Hook on every push to `main`, with the hook URL stored in the `RENDER_DEPLOY_HOOK` repository secret.
 
 ## Data Flow
 
@@ -51,7 +54,8 @@ flowchart TD
 |---------|---------|-------|
 | Pillow | Decode, grayscale, resize images | Core dependency |
 | cairosvg | Rasterize SVG uploads to PNG | Relies on the cairo library available in Render's Python runtime |
-| Render | Hosting | Python web service; auto-deploys `main` and injects `$PORT` |
+| Render | Hosting | Python web service; injects `$PORT`; deploys triggered via its Deploy Hook |
+| GitHub Actions | Deploy automation | `deploy.yml` POSTs the Render Deploy Hook on push to `main` (hook in `RENDER_DEPLOY_HOOK` secret) |
 
 ## Key Architectural Decisions
 
@@ -69,6 +73,11 @@ flowchart TD
 - **Context**: `app.run()` is single-threaded and explicitly not for production.
 - **Decision**: Serve via gunicorn with 2 workers, declared in `render.yaml`'s start command (and mirrored in `Procfile`).
 - **Rationale**: Concurrent request handling and a production-grade WSGI server, with worker count kept low to fit a small instance.
+
+### CI-driven deploys via a Render Deploy Hook
+- **Context**: Pushes to `main` should reach production without a manual step, and the deploy should be visible in the repo's CI history.
+- **Decision**: A GitHub Actions workflow POSTs to a Render Deploy Hook on every push to `main`, with the hook URL kept in the `RENDER_DEPLOY_HOOK` secret.
+- **Rationale**: Routing the deploy through Actions gives a single audit trail (and a `workflow_dispatch` manual trigger) instead of relying solely on Render's opaque branch watcher, while the Deploy Hook keeps no Render API key in the repo — the hook URL is its own scoped credential.
 
 ### Safe-by-default error and input handling
 - **Context**: A public endpoint accepting file uploads and free-form parameters is an attack surface.
