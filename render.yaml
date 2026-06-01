@@ -3,6 +3,8 @@ services:
     name: image-to-ascii
     runtime: docker
     dockerfilePath: ./Dockerfile
+    branch: main
+    autoDeploy: true
     envVars:
       - key: FLASK_ENV
         value: production
