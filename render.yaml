@@ -3,7 +3,7 @@ services:
     name: image-to-ascii
     env: python
     buildCommand: pip install --upgrade pip && pip install -r requirements.txt
-    startCommand: python app.py
+    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT --workers 2
     envVars:
       - key: PYTHON_VERSION
         value: 3.12.10

@@ -146,7 +146,7 @@ function convertToAscii() {
     .then(response => response.json())
     .then(data => {
         if (data.error) {
-            asciiPreview.innerHTML = `<p class="placeholder" style="color: #ff4444;">Error: ${data.error}</p>`;
+            showError(`Error: ${data.error}`);
             return;
         }
 
@@ -157,8 +157,19 @@ function convertToAscii() {
     })
     .catch(error => {
         console.error('Error:', error);
-        asciiPreview.innerHTML = `<p class="placeholder" style="color: #ff4444;">Error converting image. Please try again.</p>`;
+        showError('Error converting image. Please try again.');
     });
+}
+
+// Render an error message as plain text (never as HTML) to avoid injecting
+// server-supplied strings into the DOM.
+function showError(message) {
+    asciiPreview.replaceChildren();
+    const p = document.createElement('p');
+    p.className = 'placeholder';
+    p.style.color = '#ff4444';
+    p.textContent = message;
+    asciiPreview.appendChild(p);
 }
 
 function copyAscii() {
