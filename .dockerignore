@@ -1,0 +1,14 @@
+.git
+.gitignore
+__pycache__/
+*.py[cod]
+venv/
+.venv/
+env/
+ENV/
+uploads/
+.vscode/
+.idea/
+.DS_Store
+.project-hub-tasks.json
+README.md
