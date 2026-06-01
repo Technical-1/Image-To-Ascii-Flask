@@ -76,16 +76,33 @@ You can also enter custom character sets in the "Custom Characters" field.
 ## Project Structure
 
 ```
-Image-To-Ascii/
-├── app.py                 # Flask web application
-├── generate_ascii.py      # Core ASCII conversion logic
+Image-To-Ascii-Flask/
+├── app.py                 # Flask web application (POST /convert endpoint)
+├── generate_ascii.py      # Core ASCII conversion logic (+ standalone CLI)
 ├── requirements.txt       # Python dependencies
+├── Dockerfile             # Production image (installs libcairo2 for SVG)
+├── render.yaml            # Render deployment config (Docker web service)
+├── Procfile               # gunicorn process definition
 ├── templates/
-│   └── index.html        # Web UI template
-├── static/
-│   ├── style.css        # Stylesheet
-│   └── script.js        # Frontend JavaScript
-└── uploads/             # Temporary upload directory (created automatically)
+│   └── index.html         # Web UI template
+└── static/
+    ├── style.css          # Stylesheet
+    └── script.js          # Frontend JavaScript
+```
+
+Uploads are processed in memory — no files are written to disk.
+
+## Deployment
+
+The app is deployed on [Render](https://render.com) as a Docker web service. The
+`Dockerfile` is built on `python:3.12-slim` and installs `libcairo2`, which
+cairosvg needs to rasterize SVG uploads (the default Python buildpack lacks it,
+which is why SVG conversion requires the container). gunicorn serves the app with
+2 workers, bound to the `$PORT` Render injects at runtime.
+
+```bash
+# Run the production server locally
+gunicorn app:app --bind 0.0.0.0:5001 --workers 2
 ```
 
 ## License
