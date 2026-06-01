@@ -52,3 +52,6 @@ uploads/
 Thumbs.db
 
 Deployment.md
+
+# Project Hub investigate artifact (tasks live in Project Hub, not the repo)
+.project-hub-tasks.json
